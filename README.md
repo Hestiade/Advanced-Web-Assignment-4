@@ -4,7 +4,9 @@ Name: İrem AYRANPINAR
 
 Student number: 2300005623
 
-Bonuses in progress: **Bonus 2: Depth** (A and B completed), **Bonus 4: Git repository**.
+Bonuses claimed: **Bonus 2: Depth** (A, B and C).
+
+Bonus in progress: **Bonus 4: Git repository**.
 
 ## Run
 
@@ -351,6 +353,54 @@ form 12 map: React revision done
 
 ## TypeScript topics
 
+### T1: A colon can rename a binding
+
+In `const { title: string } = example`, `string` is the new variable name. The word after the colon does not annotate the value's type inside a destructuring pattern. To add a type, put it after the whole pattern: `const { title }: { title: string } = example`. Both examples in `ts/types.ts` print `Daily agenda`; the teacher's `point` and `horizontal` example is also preserved.
+
+### T2: Tuples and as const
+
+The return type `[number, string]` describes two positions with different types. After destructuring `sessionResult()`, `minutes` is a number and `title` is a string. The array `[25, 'Drawing'] as const` is inferred as a readonly tuple with the literal types `25` and `'Drawing'`. `as const` affects the type; it does not freeze the array at runtime.
+
+### T3: Possibly missing elements
+
+With `noUncheckedIndexedAccess`, taking the first element from a `string[]` gives `string | undefined`. The empty `activities` array actually produces `undefined`, so the guarded `toUpperCase()` call does not run. A default of `'Rest'` makes `fallback` a string, and its uppercase value is printed as `REST`.
+
+### T4: Optional fields and defaults
+
+The type `Options = { minutes?: number }` allows an object without a `minutes` property. Reading it without a default gives `number | undefined`. Reading it as `minutes: safeMinutes = 25` gives a number, so adding five is safe. The example prints `undefined`, `25` and `30`.
+
+### T5: A real diagnostic and its fix
+
+The experiment deliberately assigns a `[number, string]` result to a `[number, number]` annotation. The second position is wrong. With only the T5 `@ts-expect-error` comment temporarily removed, `npm run check` failed with this actual diagnostic:
+
+```text
+ts/types.ts(52,9): error TS2322: Type '[number, string]' is not assignable to type '[number, number]'.
+  Type at position 1 in source is not compatible with type at position 1 in target.
+    Type 'string' is not assignable to type 'number'.
+```
+
+The correct version keeps the second position as a string:
+
+```ts
+const [correctMinutes, correctTitle]: [number, string] = result
+```
+
+The single permitted suppression was then restored above the deliberately incorrect line, and `npm run check` passed. `@ts-expect-error` expects a diagnostic on the next line; it reports an unused directive if that line no longer has an error. The runtime log still reports a string for `wrongMinutes`: a type annotation does not convert the actual value to a number.
+
+**Actual runtime output for T1–T5** (from `npm run all`, which runs `ts/types.ts` with `tsx`):
+
+```text
+T1: 1
+T1 rename: Daily agenda
+T1 annotation: Daily agenda
+T2: 50 React revision 25 Drawing
+T3 first: undefined
+T3 fallback: REST
+T4: undefined 25 30
+T5 wrong at runtime: React revision string
+T5 fixed: 25 React revision
+```
+
 ## Pitfalls
 
 ## Props and children
@@ -494,6 +544,58 @@ Each run started with a fresh `calls = 0`. The results matched the expectation. 
 **Why:** The counter shows that the fallback function is evaluated only when needed, rather than being called and having its result discarded. Both a missing property and an explicit `undefined` trigger it. Zero and `null` preserve their values and skip the function call. This matches the initializer condition in [ECMAScript KeyedBindingInitialization](https://tc39.es/ecma262/multipage/ecmascript-language-statements-and-declarations.html#sec-runtime-semantics-keyedbindinginitialization).
 
 The pattern initializes bindings from left to right. `work` already contains `25` when `rest` is calculated, giving `5`. In the reversed dependency, `second` exists but has not been initialized when `first` tries to read it; that is the temporal dead zone. `new Function` isolates this deliberately failing experiment, and the catch prints its real error so the rest of the file can continue.
+
+### C: Extracting types with infer and Parameters
+
+**Code** (from `ts/types.ts`):
+
+```ts
+{
+  type First<T extends readonly unknown[]> =
+    T extends readonly [infer Head, ...unknown[]] ? Head : never
+  type Rest<T extends readonly unknown[]> =
+    T extends readonly [unknown, ...infer Tail] ? Tail : []
+  type Session = [number, string, boolean]
+  const first: First<Session> = 25
+  const remaining: Rest<Session> = ['Drawing', true]
+  function describeSession(minutes: number, title: string) {
+    return title + ': ' + minutes
+  }
+  const args: Parameters<typeof describeSession> = [25, 'Drawing']
+  console.log('depth C:', first, remaining, describeSession(...args))
+}
+```
+
+**Actual runtime output** (from `npm run all`):
+
+```text
+depth C: 25 [ 'Drawing', true ] Drawing: 25
+```
+
+`First` matches a tuple with a required first position and infers that position's type as `Head`. `Rest` skips the first position and infers the remaining tuple as `Tail`. This follows the approach described in the [TypeScript handbook on infer within conditional types](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#inferring-within-conditional-types).
+
+`Parameters<typeof describeSession>` produces the parameter tuple `[minutes: number, title: string]`. The `args` value is checked against it, then spread into the call. See the [TypeScript Parameters utility](https://www.typescriptlang.org/docs/handbook/utility-types.html#parameterstype).
+
+**Extra type experiment:** The installed TypeScript compiler's type checker was used to inspect the types, as an editor hover would. The original source and a temporary in-memory version with `Session` replaced by `readonly [25, 'Drawing', true]` were both checked. A temporary alias `type ArrayFirst = First<string[]>` also checked the ordinary-array limitation. Neither experiment added a file to the project.
+
+**Actual type-inspection output:**
+
+```text
+General tuple:
+First<string[]>: never
+first: number
+remaining: [string, boolean]
+args: [minutes: number, title: string]
+Readonly literal tuple:
+First<string[]>: never
+first: 25
+remaining: ["Drawing", true]
+args: [minutes: number, title: string]
+```
+
+The readonly literal tuple preserves the exact values in the inferred types: `first` becomes `25`, and `remaining` becomes `["Drawing", true]`. This `Rest` definition does not preserve the readonly modifier on the resulting tail. The final source keeps the general `[number, string, boolean]` tuple.
+
+`First<string[]>` is `never` with this definition because an ordinary array can be empty and does not guarantee a first position. This helper supports tuples with a required head; it is not a general first-element type for every array. Type aliases and `infer` do their work during type checking and do not produce runtime values. The console output comes from the actual values checked using those types.
 
 ## Bonus 3: Real code
 
