@@ -1,2 +1,6 @@
 node_modules
 dist
+guide.aux
+guide.log
+guide.out
+guide.toc

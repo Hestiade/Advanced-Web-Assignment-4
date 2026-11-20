@@ -4,7 +4,7 @@ Name: İrem AYRANPINAR
 
 Student number: 2300005623
 
-Bonuses claimed: **Bonus 2: Depth** (A, B and C), **Bonus 3: Real code**.
+Bonuses claimed: **Bonus 1: LaTeX**, **Bonus 2: Depth** (A, B and C), **Bonus 3: Real code**.
 
 Bonus in progress: **Bonus 4: Git repository**.
 
@@ -1067,6 +1067,23 @@ experiment.tsx(55,12): error TS2537: Type '{ monday: number; tuesday: number; }'
 
 ## Bonus 1: LaTeX
 
+The complete README is typeset with Pandoc and XeLaTeX. Code uses listings, the tables are LaTeX tables, and the table of contents links to the sections.
+
+Source: [guide.tex](guide.tex)
+
+PDF: [guide.pdf](guide.pdf)
+
+The personal prediction and reflection fields under My own log still require student completion. The PDF includes those fields too. After editing the README, rerun the commands below so the LaTeX source and PDF contain the same final content.
+
+Commands:
+
+```sh
+node prepare-latex.mjs
+pandoc guide-input.md --from=markdown --to=latex --standalone --toc --number-sections --listings --include-in-header=latex-header.tex --metadata title="Destructuring Field Guide" --metadata author="İrem AYRANPINAR - 2300005623" -V documentclass=article -V geometry:margin=25mm -V fontsize=11pt -o guide.tex
+xelatex -interaction=nonstopmode -halt-on-error guide.tex
+xelatex -interaction=nonstopmode -halt-on-error guide.tex
+```
+
 ## Bonus 2: Depth
 
 ### A: Iterables and generator closing
@@ -1326,7 +1343,11 @@ const build2 = result.build;
 
 ### Case 4: A nested pattern that is harder to follow
 
-**Source:** `node_modules/typescript/lib/typescript.js`, TypeScript `5.8.3`, line 7802, inside `onTimerToUpdateChildWatches`. **Forms:** 9 with an array pattern from Form 1.
+**Source:** `node_modules/typescript/lib/typescript.js`, TypeScript `5.8.3`, line 7802.
+
+**Context:** `onTimerToUpdateChildWatches`.
+
+**Forms:** 9 with an array pattern from Form 1.
 
 **Original code:**
 

@@ -1,0 +1,19 @@
+% İrem AYRANPINAR
+% 2300005623
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  rulecolor=\color{gray},
+  literate={İ}{{\.{I}}}1 {ı}{{\i}}1 {ş}{{\c{s}}}1 {Ş}{{\c{S}}}1 {ğ}{{\u{g}}}1 {Ğ}{{\u{G}}}1 {ö}{{\"o}}1 {Ö}{{\"O}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1 {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1
+}
+\setlength{\emergencystretch}{3em}
+% Keep diagnostic headings on their own line above the code listings.
+\let\originalparagraph\paragraph
+\renewcommand{\paragraph}[1]{\originalparagraph{#1}\mbox{}}
