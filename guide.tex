@@ -105,9 +105,7 @@ Name: İrem AYRANPINAR
 Student number: 2300005623
 
 Bonuses claimed: \textbf{Bonus 1: LaTeX}, \textbf{Bonus 2: Depth} (A, B
-and C), \textbf{Bonus 3: Real code}.
-
-Bonus in progress: \textbf{Bonus 4: Git repository}.
+and C), \textbf{Bonus 3: Real code}, \textbf{Bonus 4: Git repository}.
 
 \subsection{Run}\label{run}
 
@@ -1544,10 +1542,8 @@ Source: \url{guide.tex}
 
 PDF: \url{guide.pdf}
 
-The personal prediction and reflection fields under My own log still
-require student completion. The PDF includes those fields too. After
-editing the README, rerun the commands below so the LaTeX source and PDF
-contain the same final content.
+After editing the README, rerun the commands below so the LaTeX source
+and PDF contain the same final content.
 
 Commands:
 
@@ -2031,13 +2027,23 @@ v6.0.0, packages/vite/src/shared/utils.ts, line 36}.
 
 https://github.com/Hestiade/Advanced-Web-Assignment-4
 
+The repository is public. At verification, its history contained 12
+commits dated 17 and 20 November 2026. The initial commit was on 17
+November; the implementation steps were committed on 20 November.
+
+A fresh GitHub clone of commit \passthrough{\lstinline!627a10e!} passed
+\passthrough{\lstinline!npm install!},
+\passthrough{\lstinline!npm run all!} and
+\passthrough{\lstinline!npm run check!}. The cloned
+\passthrough{\lstinline!guide.tex!} also compiled successfully with
+XeLaTeX twice. The \passthrough{\lstinline!.gitignore!} excludes
+\passthrough{\lstinline!node\_modules!} and temporary LaTeX files.
+
 \subsection{My own log}\label{my-own-log}
 
-\textbf{Personal completion required:} The technical results below were
-recorded during the assisted local runs. Fill the prediction and
-reflection fields in your own words before submission. Do not invent a
-prior prediction; state that there was none if that is true. Replace any
-entry that does not reflect your experience with a genuine one.
+These notes are from the experiments run with coding assistance. I did
+not have clear predictions before these tests. The explanations below
+follow the real outputs.
 
 \subsubsection{1. Defaults with zero, undefined and
 null}\label{defaults-with-zero-undefined-and-null}
@@ -2052,17 +2058,17 @@ null}\label{defaults-with-zero-undefined-and-null}
   then to \passthrough{\lstinline!null!}, in separate runs. A counter
   recorded calls to \passthrough{\lstinline!chooseMinutes()!}.
 \item
-  My prediction: {[}YOUR ACTUAL PREDICTION, OR STATE THAT YOU HAD NO
-  PRIOR PREDICTION{]}
+  My prediction: I was not sure when the default function would run.
 \item
-  Actual result: Zero and null skipped the fallback call. Explicit
-  undefined called it; the later missing-property case made one
-  additional call in each run.
+  Actual result: With zero and null,
+  \passthrough{\lstinline!chooseMinutes()!} did not run. With undefined,
+  it ran. The missing property also called the function.
 \item
   Exact error: There was no error in these default-value comparisons.
 \item
-  What I learned or changed: {[}YOUR EXPLANATION OF WHAT THE CALL COUNTS
-  SHOWED{]}
+  What I learned or changed: A default is used for undefined. It does
+  not replace zero or null. The counter shows when the function is
+  called.
 \end{itemize}
 
 \begin{lstlisting}
@@ -2090,8 +2096,8 @@ iterator}\label{an-array-like-object-without-an-iterator}
   tried an array pattern on
   \passthrough{\lstinline!\{ 0: 'React', length: 1 \}!}.
 \item
-  My prediction: {[}YOUR ACTUAL PREDICTION ABOUT THE NUMERIC KEY AND
-  LENGTH{]}
+  My prediction: I did not know if an object with a numeric key and
+  length could be used here.
 \item
   Actual result: Destructuring failed and the catch printed the
   TypeError. The other iterable examples continued to work.
@@ -2106,8 +2112,9 @@ depth A not iterable: TypeError {(intermediate value)(intermediate value)} is no
 \begin{itemize}
 \tightlist
 \item
-  What I learned or changed: {[}YOUR EXPLANATION OF WHAT MAKES A VALUE
-  ITERABLE{]}
+  What I learned or changed: Looking like an array is not enough.
+  Numeric keys and length do not make an object iterable. It also needs
+  an iterator.
 \end{itemize}
 
 \subsubsection{3. A tuple annotation does not convert a
@@ -2122,8 +2129,8 @@ value}\label{a-tuple-annotation-does-not-convert-a-value}
   suppression comment was temporarily removed for the compiler run, then
   restored.
 \item
-  My prediction: {[}YOUR ACTUAL PREDICTION ABOUT THE COMPILER AND THE
-  RUNTIME VALUE{]}
+  My prediction: I did not have a clear prediction about the type check
+  and the actual value.
 \item
   Actual result: The compiler rejected the annotation. The runtime
   output still showed the second value as a string. The corrected
@@ -2146,8 +2153,9 @@ T5 fixed: 25 React revision
 \begin{itemize}
 \tightlist
 \item
-  What I learned or changed: {[}YOUR EXPLANATION OF THE DIFFERENCE
-  BETWEEN A TYPE ANNOTATION AND A RUNTIME CONVERSION{]}
+  What I learned or changed: A TypeScript annotation does not change the
+  JavaScript value. I need to use the correct type instead of expecting
+  the string to become a number.
 \end{itemize}
 
 \subsubsection{4. A function passed as ordinary child
@@ -2161,8 +2169,8 @@ content}\label{a-function-passed-as-ordinary-child-content}
   \passthrough{\lstinline!RenderCard!} that explicitly calls its
   function-valued children.
 \item
-  My prediction: {[}YOUR ACTUAL PREDICTION ABOUT WHETHER REACT WOULD
-  CALL THE FUNCTION{]}
+  My prediction: I was not sure if React would call the function given
+  as children.
 \item
   Actual result: The ordinary function child produced no child HTML and
   a React warning. The explicit render-prop call produced a bold Drawing
@@ -2182,8 +2190,9 @@ P3 render prop: <section><b>Drawing</b></section>
 \begin{itemize}
 \tightlist
 \item
-  What I learned or changed: {[}YOUR EXPLANATION OF WHY THE RENDER-PROP
-  VERSION WORKED{]}
+  What I learned or changed: React does not call the function just
+  because it is between tags. In \passthrough{\lstinline!RenderCard!},
+  the component calls the function and renders its result.
 \end{itemize}
 
 \subsubsection{5. Rest props and the final
@@ -2198,8 +2207,8 @@ className}\label{rest-props-and-the-final-classname}
   \passthrough{\lstinline!className!} in one component, and before it in
   the other.
 \item
-  My prediction: {[}YOUR ACTUAL PREDICTION ABOUT WHICH CLASSNAME WOULD
-  WIN{]}
+  My prediction: I was not sure which className would be used when both
+  were present.
 \item
   Actual result: The final value of \passthrough{\lstinline!className!}
   followed the prop order. The \passthrough{\lstinline!id!} was
@@ -2216,8 +2225,10 @@ P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</secti
 \begin{itemize}
 \tightlist
 \item
-  What I learned or changed: {[}YOUR EXPLANATION OF THE SPREAD ORDER AND
-  WHICH FIELDS REMAIN IN REST{]}
+  What I learned or changed: The last className wins. I need to check
+  the position of \passthrough{\lstinline!\{...rest\}!}, because it can
+  replace an earlier prop. The extracted title and children are not in
+  rest.
 \end{itemize}
 
 \end{document}

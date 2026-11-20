@@ -4,9 +4,7 @@ Name: İrem AYRANPINAR
 
 Student number: 2300005623
 
-Bonuses claimed: **Bonus 1: LaTeX**, **Bonus 2: Depth** (A, B and C), **Bonus 3: Real code**.
-
-Bonus in progress: **Bonus 4: Git repository**.
+Bonuses claimed: **Bonus 1: LaTeX**, **Bonus 2: Depth** (A, B and C), **Bonus 3: Real code**, **Bonus 4: Git repository**.
 
 ## Run
 
@@ -1073,7 +1071,7 @@ Source: [guide.tex](guide.tex)
 
 PDF: [guide.pdf](guide.pdf)
 
-The personal prediction and reflection fields under My own log still require student completion. The PDF includes those fields too. After editing the README, rerun the commands below so the LaTeX source and PDF contain the same final content.
+After editing the README, rerun the commands below so the LaTeX source and PDF contain the same final content.
 
 Commands:
 
@@ -1392,17 +1390,21 @@ const postfix = parts.postfix
 
 https://github.com/Hestiade/Advanced-Web-Assignment-4
 
+The repository is public. At verification, its history contained 12 commits dated 17 and 20 November 2026. The initial commit was on 17 November; the implementation steps were committed on 20 November.
+
+A fresh GitHub clone of commit `627a10e` passed `npm install`, `npm run all` and `npm run check`. The cloned `guide.tex` also compiled successfully with XeLaTeX twice. The `.gitignore` excludes `node_modules` and temporary LaTeX files.
+
 ## My own log
 
-**Personal completion required:** The technical results below were recorded during the assisted local runs. Fill the prediction and reflection fields in your own words before submission. Do not invent a prior prediction; state that there was none if that is true. Replace any entry that does not reflect your experience with a genuine one.
+These notes are from the experiments run with coding assistance. I did not have clear predictions before these tests. The explanations below follow the real outputs.
 
 ### 1. Defaults with zero, undefined and null
 
 - What was tested: In Bonus 2 B (`js/objects.mjs`), the provided `minutes` value was changed from `0` to `undefined`, then to `null`, in separate runs. A counter recorded calls to `chooseMinutes()`.
-- My prediction: [YOUR ACTUAL PREDICTION, OR STATE THAT YOU HAD NO PRIOR PREDICTION]
-- Actual result: Zero and null skipped the fallback call. Explicit undefined called it; the later missing-property case made one additional call in each run.
+- My prediction: I was not sure when the default function would run.
+- Actual result: With zero and null, `chooseMinutes()` did not run. With undefined, it ran. The missing property also called the function.
 - Exact error: There was no error in these default-value comparisons.
-- What I learned or changed: [YOUR EXPLANATION OF WHAT THE CALL COUNTS SHOWED]
+- What I learned or changed: A default is used for undefined. It does not replace zero or null. The counter shows when the function is called.
 
 ```text
 depth B provided: 0 0
@@ -1422,7 +1424,7 @@ depth B missing: 25 1
 ### 2. An array-like object without an iterator
 
 - What was tested: Bonus 2 A (`js/arrays.mjs`) tried an array pattern on `{ 0: 'React', length: 1 }`.
-- My prediction: [YOUR ACTUAL PREDICTION ABOUT THE NUMERIC KEY AND LENGTH]
+- My prediction: I did not know if an object with a numeric key and length could be used here.
 - Actual result: Destructuring failed and the catch printed the TypeError. The other iterable examples continued to work.
 - Exact error:
 
@@ -1430,12 +1432,12 @@ depth B missing: 25 1
 depth A not iterable: TypeError {(intermediate value)(intermediate value)} is not iterable
 ```
 
-- What I learned or changed: [YOUR EXPLANATION OF WHAT MAKES A VALUE ITERABLE]
+- What I learned or changed: Looking like an array is not enough. Numeric keys and length do not make an object iterable. It also needs an iterator.
 
 ### 3. A tuple annotation does not convert a value
 
 - What was tested: T5 (`ts/types.ts`) annotated a `[number, string]` result as `[number, number]`. Only the permitted suppression comment was temporarily removed for the compiler run, then restored.
-- My prediction: [YOUR ACTUAL PREDICTION ABOUT THE COMPILER AND THE RUNTIME VALUE]
+- My prediction: I did not have a clear prediction about the type check and the actual value.
 - Actual result: The compiler rejected the annotation. The runtime output still showed the second value as a string. The corrected annotation uses `[number, string]`.
 - Exact compiler error from the temporary version:
 
@@ -1450,12 +1452,12 @@ T5 wrong at runtime: React revision string
 T5 fixed: 25 React revision
 ```
 
-- What I learned or changed: [YOUR EXPLANATION OF THE DIFFERENCE BETWEEN A TYPE ANNOTATION AND A RUNTIME CONVERSION]
+- What I learned or changed: A TypeScript annotation does not change the JavaScript value. I need to use the correct type instead of expecting the string to become a number.
 
 ### 4. A function passed as ordinary child content
 
 - What was tested: P3 (`js/props.jsx`) passed a function as ordinary children, then used a separate `RenderCard` that explicitly calls its function-valued children.
-- My prediction: [YOUR ACTUAL PREDICTION ABOUT WHETHER REACT WOULD CALL THE FUNCTION]
+- My prediction: I was not sure if React would call the function given as children.
 - Actual result: The ordinary function child produced no child HTML and a React warning. The explicit render-prop call produced a bold Drawing element.
 - Exact warning and rendered results:
 
@@ -1467,12 +1469,12 @@ P3 raw function warnings: [
 P3 render prop: <section><b>Drawing</b></section>
 ```
 
-- What I learned or changed: [YOUR EXPLANATION OF WHY THE RENDER-PROP VERSION WORKED]
+- What I learned or changed: React does not call the function just because it is between tags. In `RenderCard`, the component calls the function and renders its result.
 
 ### 5. Rest props and the final className
 
 - What was tested: P4 (`js/props.jsx` and `ts/props.tsx`) placed `{...rest}` after an explicit `className` in one component, and before it in the other.
-- My prediction: [YOUR ACTUAL PREDICTION ABOUT WHICH CLASSNAME WOULD WIN]
+- My prediction: I was not sure which className would be used when both were present.
 - Actual result: The final value of `className` followed the prop order. The `id` was forwarded in both versions.
 - Exact error: There was no error in these valid render calls.
 
@@ -1481,4 +1483,4 @@ P4 rest last: <section class="from-rest" id="agenda"><h2>Agenda</h2>Notes</secti
 P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</section>
 ```
 
-- What I learned or changed: [YOUR EXPLANATION OF THE SPREAD ORDER AND WHICH FIELDS REMAIN IN REST]
+- What I learned or changed: The last className wins. I need to check the position of `{...rest}`, because it can replace an earlier prop. The extracted title and children are not in rest.
