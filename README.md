@@ -14,27 +14,6 @@ npm run all      # runs the JS and TS examples
 npm run check    # type-checks in strict mode
 ```
 
-## How an entry looks
-
-Starter reference only; the entries with my example data are in Field guide below.
-
-### Form 1: array destructuring, `const [x, y] = f()`
-
-**Syntax:** `const [lowest, highest] = minMax([4, 9, 2])`
-
-**Example** (from `js/arrays.mjs`):
-
-```js
-const [lowest, highest] = minMax([4, 9, 2])
-console.log('form 1:', lowest, highest)
-```
-
-**Output:** `form 1: 2 9`
-
-**Use it when:** a function returns several values in order.
-
-**Watch out:** the order matters, and a missing item gives `undefined`.
-
 ## Field guide
 
 ### Form 1: values returned by position
@@ -285,6 +264,90 @@ form 10: tuesday 75
 **Use it when:** A variable decides which day's total should be read.
 
 **Watch out:** The brackets evaluate `selectedDay` as the property key; the new variable is `selectedMinutes`. An unknown key gives `undefined` in JS. The TS version uses `keyof typeof totals` to accept only `monday` or `tuesday` as keys.
+
+### Form 11: patterns in function parameters
+
+**Syntax:** `function planSession({ title = 'Free drawing', minutes = 25 } = {})`
+
+**Example** (from `js/params.mjs`; typed counterpart in `ts/params.ts`):
+
+```js
+// Own Form 11: both the object and its properties can have defaults.
+{
+  function planSession({ title = 'Free drawing', minutes = 25 } = {}) {
+    return { title, minutes }
+  }
+  console.log('own form 11 missing:', planSession())
+  console.log('own form 11 partial:', planSession({ title: 'React revision' }))
+  console.log('own form 11 zero:', planSession({ title: 'Rest', minutes: 0 }))
+}
+```
+
+**Output:**
+
+```text
+own form 11 missing: { title: 'Free drawing', minutes: 25 }
+own form 11 partial: { title: 'React revision', minutes: 25 }
+own form 11 zero: { title: 'Rest', minutes: 0 }
+```
+
+**Array parameter (Form 11b)** (from the same files):
+
+```js
+{
+  function sessionLength([workMinutes, breakMinutes]) {
+    return workMinutes + breakMinutes
+  }
+  console.log('form 11b:', sessionLength([25, 5]))
+}
+```
+
+**Output:**
+
+```text
+form 11b: 30
+```
+
+**Use it when:** An options object lets callers supply only the session settings they need. An array parameter fits a small pair with a known order, such as work and break durations.
+
+**Watch out:** The outer `= {}` handles an omitted or `undefined` argument. The property defaults fill in missing fields. A `null` argument still throws, and a provided zero remains zero. In TS, `SessionOptions` marks the fields optional, and its annotation goes after the whole pattern. Form 11b uses `[number, number]` to require two numbers. The teacher's original `createTask` example is preserved; its TS `title` remains required.
+
+### Form 12: patterns in loops
+
+**Syntax:** `for (const [day, minutes] of Object.entries(minutesByDay))`
+
+**Example** (from `js/params.mjs`; typed counterpart in `ts/params.ts`):
+
+```js
+{
+  const minutesByDay = { monday: 50, tuesday: 75 }
+  for (const [day, minutes] of Object.entries(minutesByDay)) {
+    console.log('form 12 object:', day, minutes)
+  }
+  const taskStatuses = new Map([
+    ['Sketch cover', 'todo'],
+    ['React revision', 'done'],
+  ])
+  for (const [title, status] of taskStatuses) {
+    console.log('form 12 map:', title, status)
+  }
+}
+```
+
+**Output:**
+
+```text
+form 12 object: monday 50
+form 12 object: tuesday 75
+form 12 map: Sketch cover todo
+form 12 map: React revision done
+```
+
+**Use it when:** Each iteration needs both a key and its value, such as a day's minutes or a task's status.
+
+**Watch out:** `Object.entries` returns pairs for own enumerable string-keyed properties. `Map` can keep other key types. `for...of` reads the pairs; `for...in` provides property keys instead. In TS, the Map is declared as `Map<string, 'todo' | 'done'>`, so its status values are limited to those two strings.
+
+**Rest and spread:** In a pattern, `...laterActivities` collects the remaining values (rest). In an expression, `[...minutes]` or `{ ...object }` expands existing values (spread). The three dots have different jobs depending on where they appear.
 
 ## TypeScript topics
 
