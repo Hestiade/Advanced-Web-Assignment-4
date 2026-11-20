@@ -1,0 +1,135 @@
+
+> destructuring-guide@0.0.0 all
+> npm run js && npm run ts
+
+
+> destructuring-guide@0.0.0 js
+> node js/arrays.mjs && node js/objects.mjs && node js/params.mjs && node js/pitfalls.mjs && tsx js/props.jsx
+
+form 1: 2 9
+own form 1: 3 80
+form 2: React revision [ 'Pixel drawing', 'Walk' ]
+form 3: Drawing Coding
+form 4: 25 0
+depth A string: A R
+depth A set: React [ 'Pixel art', 'Math' ]
+depth A map: monday 50
+depth A generator: 25 [ 'yield 25', 'iterator closed' ]
+depth A not iterable: TypeError {(intermediate value)(intermediate value)} is not iterable
+form 5: Buy milk todo
+own form 5: Sketch the agenda cover in-progress
+form 6: Sketch the agenda cover Sketch the agenda cover
+form 7: normal
+form 8: session-7 { title: 'React revision', minutes: 25 }
+form 9: Irem Draw a cover
+form 10: tuesday 75
+depth B provided: 0 0
+depth B missing: 25 1
+depth B earlier binding: 25 5
+depth B later binding: ReferenceError Cannot access 'second' before initialization
+form 11: { title: 'Read', status: 'todo' }
+own form 11 missing: { title: 'Free drawing', minutes: 25 }
+own form 11 partial: { title: 'React revision', minutes: 25 }
+own form 11 zero: { title: 'Rest', minutes: 0 }
+form 11b: 30
+form 12 object: monday 50
+form 12 object: tuesday 75
+form 12 map: Sketch cover todo
+form 12 map: React revision done
+pitfall 1: TypeError
+own pitfall 1: TypeError Cannot destructure property 'title' of 'value' as it is undefined.
+own pitfall 1: TypeError Cannot destructure property 'title' of 'value' as it is null.
+pitfall 2: 25 25 null
+pitfall 3 error: SyntaxError Unexpected token '='
+pitfall 3 fixed: Study React
+pitfall 4: Updated owner true
+pitfall 5 object: React revision 25
+pitfall 5 array: 25 React revision
+A: <section><h2>Hi</h2>text</section>
+B: <section><h2>Hi</h2>text</section>
+P1 A: <section><h2>Agenda</h2>Plan a drawing session</section>
+P1 B: <section><h2>Agenda</h2>Plan a drawing session</section>
+P2 tags: <section><h2>Agenda</h2>Draw a cover</section>
+P2 prop: <section><h2>Agenda</h2>Draw a cover</section>
+P3 string: <section><h2>Child</h2>React revision</section>
+P3 number: <section><h2>Child</h2>25</section>
+P3 zero: <section><h2>Child</h2>0</section>
+P3 element: <section><h2>Child</h2><strong>Drawing</strong></section>
+P3 several: <section><h2>Child</h2><span>Study</span><span>Draw</span></section>
+P3 undefined: <section><h2>Child</h2></section>
+P3 null: <section><h2>Child</h2></section>
+P3 false: <section><h2>Child</h2></section>
+P3 raw function: <section><h2>Function</h2></section>
+P3 raw function warnings: [
+  'Functions are not valid as a React child. This may happen if you return %s instead of <%s /> from render. Or maybe you meant to call this function rather than return it. children children'
+]
+P3 render prop: <section><b>Drawing</b></section>
+P4 rest last: <section class="from-rest" id="agenda"><h2>Agenda</h2>Notes</section>
+P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</section>
+P5 slots: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+P5 children: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+P6 missing: <section><h2>Untitled session</h2>Notes</section>
+P6 undefined: <section><h2>Untitled session</h2>Notes</section>
+P6 null: <section><h2></h2>Notes</section>
+P7 node: <section><h2>ReactNode</h2>25</section>
+P7 optional: <aside><h2>No child</h2></aside>
+P7 button: <button type="button" disabled="">Start</button>
+
+> destructuring-guide@0.0.0 ts
+> tsx ts/arrays.ts && tsx ts/objects.ts && tsx ts/params.ts && tsx ts/types.ts && tsx ts/props.tsx
+
+form 1: 2 9
+own form 1: 3 80
+form 2: React revision [ 'Pixel drawing', 'Walk' ]
+form 3: Drawing Coding
+form 4: 25 0
+form 5: Buy milk todo
+own form 5: Sketch the agenda cover in-progress
+form 6: Sketch the agenda cover Sketch the agenda cover
+form 7: normal
+form 8: session-7 { title: 'React revision', minutes: 25 }
+form 9: Irem Draw a cover
+form 10: tuesday 75
+form 11: { title: 'Read', status: 'todo' }
+own form 11 missing: { title: 'Free drawing', minutes: 25 }
+own form 11 partial: { title: 'React revision', minutes: 25 }
+own form 11 zero: { title: 'Rest', minutes: 0 }
+form 11b: 30
+form 12 object: monday 50
+form 12 object: tuesday 75
+form 12 map: Sketch cover todo
+form 12 map: React revision done
+T1: 1
+T1 rename: Daily agenda
+T1 annotation: Daily agenda
+T2: 50 React revision 25 Drawing
+T3 first: undefined
+T3 fallback: REST
+T4: undefined 25 30
+T5 wrong at runtime: React revision string
+T5 fixed: 25 React revision
+depth C: 25 [ 'Drawing', true ] Drawing: 25
+<section><h2>Hi</h2>text</section>
+P1 A: <section><h2>Agenda</h2>Plan a drawing session</section>
+P1 B: <section><h2>Agenda</h2>Plan a drawing session</section>
+P2 tags: <section><h2>Agenda</h2>Draw a cover</section>
+P2 prop: <section><h2>Agenda</h2>Draw a cover</section>
+P3 string: <section><h2>Child</h2>React revision</section>
+P3 number: <section><h2>Child</h2>25</section>
+P3 zero: <section><h2>Child</h2>0</section>
+P3 element: <section><h2>Child</h2><strong>Drawing</strong></section>
+P3 several: <section><h2>Child</h2><span>Study</span><span>Draw</span></section>
+P3 undefined: <section><h2>Child</h2></section>
+P3 null: <section><h2>Child</h2></section>
+P3 false: <section><h2>Child</h2></section>
+P3 render prop: <section><b>Drawing</b></section>
+P4 rest last: <section class="from-rest" id="agenda"><h2>Agenda</h2>Notes</section>
+P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</section>
+P5 slots: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+P5 children: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+P6 missing: <section><h2>Untitled session</h2>Notes</section>
+P6 undefined: <section><h2>Untitled session</h2>Notes</section>
+P6 null: <section><h2></h2>Notes</section>
+P7 node: <section><h2>ReactNode</h2>25</section>
+P7 optional: <aside><h2>No child</h2></aside>
+P7 button: <button type="button" disabled="">Start</button>

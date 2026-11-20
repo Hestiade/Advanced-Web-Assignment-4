@@ -16,6 +16,8 @@ npm run all      # runs the JS and TS examples
 npm run check    # type-checks in strict mode
 ```
 
+`output.txt` contains the complete captured output of `npm run all`, saved as UTF-8. The run completed through the final TypeScript P7 button render, and `npm run check` passed.
+
 ## Field guide
 
 ### Form 1: values returned by position
@@ -1371,4 +1373,91 @@ https://github.com/Hestiade/Advanced-Web-Assignment-4
 
 ## My own log
 
-(Your errors, wrong guesses and surprises, in your own words. See the handout.)
+**Personal completion required:** The technical results below were recorded during the assisted local runs. Fill the prediction and reflection fields in your own words before submission. Do not invent a prior prediction; state that there was none if that is true. Replace any entry that does not reflect your experience with a genuine one.
+
+### 1. Defaults with zero, undefined and null
+
+- What was tested: In Bonus 2 B (`js/objects.mjs`), the provided `minutes` value was changed from `0` to `undefined`, then to `null`, in separate runs. A counter recorded calls to `chooseMinutes()`.
+- My prediction: [YOUR ACTUAL PREDICTION, OR STATE THAT YOU HAD NO PRIOR PREDICTION]
+- Actual result: Zero and null skipped the fallback call. Explicit undefined called it; the later missing-property case made one additional call in each run.
+- Exact error: There was no error in these default-value comparisons.
+- What I learned or changed: [YOUR EXPLANATION OF WHAT THE CALL COUNTS SHOWED]
+
+```text
+depth B provided: 0 0
+depth B missing: 25 1
+```
+
+```text
+depth B provided: 25 1
+depth B missing: 25 2
+```
+
+```text
+depth B provided: null 0
+depth B missing: 25 1
+```
+
+### 2. An array-like object without an iterator
+
+- What was tested: Bonus 2 A (`js/arrays.mjs`) tried an array pattern on `{ 0: 'React', length: 1 }`.
+- My prediction: [YOUR ACTUAL PREDICTION ABOUT THE NUMERIC KEY AND LENGTH]
+- Actual result: Destructuring failed and the catch printed the TypeError. The other iterable examples continued to work.
+- Exact error:
+
+```text
+depth A not iterable: TypeError {(intermediate value)(intermediate value)} is not iterable
+```
+
+- What I learned or changed: [YOUR EXPLANATION OF WHAT MAKES A VALUE ITERABLE]
+
+### 3. A tuple annotation does not convert a value
+
+- What was tested: T5 (`ts/types.ts`) annotated a `[number, string]` result as `[number, number]`. Only the permitted suppression comment was temporarily removed for the compiler run, then restored.
+- My prediction: [YOUR ACTUAL PREDICTION ABOUT THE COMPILER AND THE RUNTIME VALUE]
+- Actual result: The compiler rejected the annotation. The runtime output still showed the second value as a string. The corrected annotation uses `[number, string]`.
+- Exact compiler error from the temporary version:
+
+```text
+ts/types.ts(52,9): error TS2322: Type '[number, string]' is not assignable to type '[number, number]'.
+  Type at position 1 in source is not compatible with type at position 1 in target.
+    Type 'string' is not assignable to type 'number'.
+```
+
+```text
+T5 wrong at runtime: React revision string
+T5 fixed: 25 React revision
+```
+
+- What I learned or changed: [YOUR EXPLANATION OF THE DIFFERENCE BETWEEN A TYPE ANNOTATION AND A RUNTIME CONVERSION]
+
+### 4. A function passed as ordinary child content
+
+- What was tested: P3 (`js/props.jsx`) passed a function as ordinary children, then used a separate `RenderCard` that explicitly calls its function-valued children.
+- My prediction: [YOUR ACTUAL PREDICTION ABOUT WHETHER REACT WOULD CALL THE FUNCTION]
+- Actual result: The ordinary function child produced no child HTML and a React warning. The explicit render-prop call produced a bold Drawing element.
+- Exact warning and rendered results:
+
+```text
+P3 raw function: <section><h2>Function</h2></section>
+P3 raw function warnings: [
+  'Functions are not valid as a React child. This may happen if you return %s instead of <%s /> from render. Or maybe you meant to call this function rather than return it. children children'
+]
+P3 render prop: <section><b>Drawing</b></section>
+```
+
+- What I learned or changed: [YOUR EXPLANATION OF WHY THE RENDER-PROP VERSION WORKED]
+
+### 5. Rest props and the final className
+
+- What was tested: P4 (`js/props.jsx` and `ts/props.tsx`) placed `{...rest}` after an explicit `className` in one component, and before it in the other.
+- My prediction: [YOUR ACTUAL PREDICTION ABOUT WHICH CLASSNAME WOULD WIN]
+- Actual result: The final value of `className` followed the prop order. The `id` was forwarded in both versions.
+- Exact error: There was no error in these valid render calls.
+
+```text
+P4 rest last: <section class="from-rest" id="agenda"><h2>Agenda</h2>Notes</section>
+P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</section>
+```
+
+- What I learned or changed: [YOUR EXPLANATION OF THE SPREAD ORDER AND WHICH FIELDS REMAIN IN REST]
