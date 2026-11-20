@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Array destructuring (forms 1 to 4). Plain JavaScript: run with `node js/arrays.mjs`.
 
 // Form 1 (worked example): take values out of an array by position.

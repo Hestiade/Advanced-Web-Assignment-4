@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Destructuring in parameters and loops (forms 11 and 12). Run with `node js/params.mjs`.
 
 // Form 11 (worked example): an options object in the parameter list, with defaults.

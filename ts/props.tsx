@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Props and children in TypeScript. Run with `npx tsx ts/props.tsx`.
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'

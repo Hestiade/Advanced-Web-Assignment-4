@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Forms 11 and 12 in TypeScript, and the typing rules for patterns in parameters.
 
 type TaskInput = { title: string; status?: 'todo' | 'done' }

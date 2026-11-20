@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Things that surprise people. Run with `node js/pitfalls.mjs`.
 
 // Pitfall 1 (worked example): destructuring undefined or null throws a TypeError.

@@ -1,13 +1,14 @@
 # Destructuring Field Guide
 
 Name: İrem AYRANPINAR
+
 Student number: 2300005623
 
-Bonuses claimed: none yet (write them here, for example **Bonus 1: Tests**).
+Bonuses claimed: none yet.
 
 ## Run
 
-```
+```sh
 npm install
 npm run all      # runs the JS and TS examples
 npm run check    # type-checks in strict mode
@@ -36,11 +37,23 @@ console.log('form 1:', lowest, highest)
 
 (Forms 1 to 12 go here, one entry each.)
 
+## TypeScript topics
+
 ## Pitfalls
 
 ## Props and children
 
 ## JavaScript vs TypeScript
+
+## Bonus 1: LaTeX
+
+## Bonus 2: Depth
+
+## Bonus 3: Real code
+
+## Bonus 4: Git repository
+
+https://github.com/Hestiade/Advanced-Web-Assignment-4
 
 ## My own log
 

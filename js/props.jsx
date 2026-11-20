@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // Props and children in plain JavaScript (JSX). Run with `npx tsx js/props.jsx`.
 import { renderToStaticMarkup } from 'react-dom/server'
 

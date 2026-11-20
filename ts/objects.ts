@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // The same six object forms as js/objects.mjs, now typed.
 
 type Task = { id: string; title: string; status: 'todo' | 'in-progress' | 'done' }

@@ -1,4 +1,5 @@
-// İrem AYRANPINAR - 2300005623
+// İrem AYRANPINAR
+// 2300005623
 // The same four array forms as js/arrays.mjs, now typed. Run with `npx tsx ts/arrays.ts`.
 
 // Form 1 (worked example): the return type of the function is a tuple.
