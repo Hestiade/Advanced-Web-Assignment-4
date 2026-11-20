@@ -4,7 +4,7 @@ Name: İrem AYRANPINAR
 
 Student number: 2300005623
 
-Bonuses claimed: **Bonus 2: Depth** (A, B and C).
+Bonuses claimed: **Bonus 2: Depth** (A, B and C), **Bonus 3: Real code**.
 
 Bonus in progress: **Bonus 4: Git repository**.
 
@@ -1254,6 +1254,116 @@ The readonly literal tuple preserves the exact values in the inferred types: `fi
 `First<string[]>` is `never` with this definition because an ordinary array can be empty and does not guarantee a first position. This helper supports tuples with a required head; it is not a general first-element type for every array. Type aliases and `infer` do their work during type checking and do not produce runtime values. The console output comes from the actual values checked using those types.
 
 ## Bonus 3: Real code
+
+These five cases cover the teacher's Assignment 3 starter, the installed TypeScript library and Vite. The Assignment 3 references were checked inside the original `Assignment_3/starter.zip`. The TypeScript locations were checked against both `package-lock.json` and the installed version, `5.8.3`. The Vite reference uses the fixed `v6.0.0` tag.
+
+### Case 1: Task Manager useReducer
+
+**Source:** Assignment 3 teacher's `starter.zip`, entry `starter/src/App.tsx`, line 37. **Form:** 1, values returned by position.
+
+**Original code:**
+
+```tsx
+const [tasks, dispatch] = useReducer(taskReducer, [])
+```
+
+**Without destructuring:**
+
+```tsx
+const reducerResult = useReducer(taskReducer, [])
+const tasks = reducerResult[0]
+const dispatch = reducerResult[1]
+```
+
+**Analysis:** The hook returns the current state followed by the dispatch function. The pattern gives those two related results clear local names in one line. Their positions matter: the first value is the task state and the second is the function used to send actions. The expanded version still calls the hook once. This is a useful short pattern because the pair has a known meaning and order.
+
+### Case 2: TaskRow props in a parameter
+
+**Source:** Assignment 3 teacher's `starter.zip`, entry `starter/src/TaskRow.tsx`, line 5. Its props type is on line 3; the call is in `starter/src/App.tsx`, lines 25–30. **Forms:** 5 and 11, named properties extracted in a function parameter.
+
+**Original code:**
+
+```tsx
+export default function TaskRow({ task, onNext, onDelete }: TaskRowProps) {
+```
+
+**Without destructuring** (replacement function opening; the existing body follows the bindings):
+
+```tsx
+export default function TaskRow(props: TaskRowProps) {
+  const task = props.task
+  const onNext = props.onNext
+  const onDelete = props.onDelete
+  // Existing function body follows.
+}
+```
+
+**Analysis:** `task`, `onNext` and `onDelete` are three named props within one object. `task` supplies the row data; the two callbacks are used by the Next and Delete buttons. The pattern makes the component's inputs easy to see. `TaskRowProps` has no `children` field, and the call does not pass children. The elements returned by TaskRow are its rendered content; they do not mean that TaskRow received a `children` prop. This component works with its three named props.
+
+### Case 3: Renaming a TypeScript version field
+
+**Source:** `node_modules/typescript/lib/typescript.js`, TypeScript `5.8.3`, line 4830, inside `Version.tryParse`. **Forms:** 5 and 6, named properties with a renamed binding.
+
+**Original code:**
+
+```js
+const { major, minor, patch, prerelease, build: build2 } = result;
+```
+
+**Without destructuring:**
+
+```js
+const major = result.major;
+const minor = result.minor;
+const patch = result.patch;
+const prerelease = result.prerelease;
+const build2 = result.build;
+```
+
+**Analysis:** The version components are selected by name. The `build` property becomes the local variable `build2`, while the other bindings keep their property names. The next line passes these components to a version constructor. The surrounding code checks that parsing returned a result before destructuring it. This is emitted library code, so the local name `build2` may reflect generated naming; the snippet does not establish a performance reason for that name.
+
+### Case 4: A nested pattern that is harder to follow
+
+**Source:** `node_modules/typescript/lib/typescript.js`, TypeScript `5.8.3`, line 7802, inside `onTimerToUpdateChildWatches`. **Forms:** 9 with an array pattern from Form 1.
+
+**Original code:**
+
+```js
+const { value: [dirPath, { dirName, options, fileNames }] } = result;
+```
+
+**Without destructuring:**
+
+```js
+const entry = result.value;
+const dirPath = entry[0];
+const watchInfo = entry[1];
+const dirName = watchInfo.dirName;
+const options = watchInfo.options;
+const fileNames = watchInfo.fileNames;
+```
+
+**Analysis:** Reading this line requires following an object property, a two-item entry and another object. The expanded version gives the intermediate values names, `entry` and `watchInfo`, so the data shape is easier to trace. For this case, those names make the longer version clearer. The surrounding code obtains `result` from a Map entry iterator and calls `Debug.assert(!result.done)` on line 7801. Access to the nested fields depends on that precondition.
+
+### Case 5: Vite separates a URL into named parts
+
+**Source:** [Vite v6.0.0, packages/vite/src/node/utils.ts, line 332](https://github.com/vitejs/vite/blob/v6.0.0/packages/vite/src/node/utils.ts#L332), inside `injectQuery`. **Form:** 5, named properties from a returned object.
+
+**Original code:**
+
+```ts
+const { file, postfix } = splitFileAndPostfix(url)
+```
+
+**Without destructuring:**
+
+```ts
+const parts = splitFileAndPostfix(url)
+const file = parts.file
+const postfix = parts.postfix
+```
+
+**Analysis:** The helper returns the file part and the remaining query/hash suffix. The field names explain the two results without requiring an array position convention. The surrounding function uses those parts when inserting a query. Both versions call the helper once, preserving that behavior. The two short names keep this pattern easy to read. The helper's return structure was also checked in [Vite v6.0.0, packages/vite/src/shared/utils.ts, line 36](https://github.com/vitejs/vite/blob/v6.0.0/packages/vite/src/shared/utils.ts#L36).
 
 ## Bonus 4: Git repository
 
