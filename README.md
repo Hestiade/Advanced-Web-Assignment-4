@@ -687,7 +687,7 @@ P3 raw function warnings: [
 
 The warning above is captured from React's real `console.error` call. Its format placeholders remain in the captured string because the example joins the original arguments. The original `console.error` is restored in `finally`.
 
-A raw function is not ordinary ReactNode child content. `RenderCard` instead declares a function-valued children contract and explicitly calls it with `'Drawing'`. React renders the returned element. This is the [render-prop alternative described by React](https://react.dev/reference/react/Children#calling-a-render-prop-to-customize-rendering). The TS version includes the valid render-prop example; the invalid ordinary child is reserved for the isolated compiler experiment in stage 9.
+A raw function is not ordinary ReactNode child content. `RenderCard` instead declares a function-valued children contract and explicitly calls it with `'Drawing'`. React renders the returned element. This is the [render-prop alternative described by React](https://react.dev/reference/react/Children#calling-a-render-prop-to-customize-rendering). The TS version includes the valid render-prop example; the rejected ordinary child is shown in the E9 diagnostics under P7.
 
 ### P4: Rest props and spread order
 
@@ -848,9 +848,220 @@ P7 optional: <aside><h2>No child</h2></aside>
 P7 button: <button type="button" disabled="">Start</button>
 ```
 
-The button's static HTML contains `disabled=""`; this terminal example does not simulate a click. The isolated E9–E11 compiler experiment for function children, `type="launch"` and button `href` follows in stage 9.
+The button's static HTML contains `disabled=""`; this terminal example does not simulate a click. The isolated E9–E11 experiment below confirms what the TS props types reject. These deliberately invalid examples were only type-checked.
+
+#### E9: Invalid ordinary children
+
+```tsx
+function NodeCard({ children }: { children?: ReactNode }) {
+  return <section>{children}</section>
+}
+const invalidFunction = <NodeCard>{() => <b>Drawing</b>}</NodeCard>
+const invalidObject = <NodeCard>{{ label: 'Drawing' }}</NodeCard>
+```
+
+**Actual diagnostics:**
+
+```text
+experiment.tsx(63,36): error TS2322: Type '() => JSX.Element' is not assignable to type 'ReactNode'.
+experiment.tsx(64,36): error TS2353: Object literal may only specify known properties, and 'label' does not exist in type 'ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<...>'.
+```
+
+A function is rejected as ordinary ReactNode content; the valid render-prop version in P3 declares and calls a function explicitly. A plain object with a `label` property is also rejected. To show its label, render the string property rather than the object itself.
+
+#### E10: A required prop stays required
+
+```tsx
+const missingTitle = <Layout>Drawing</Layout>
+```
+
+**Actual diagnostic:**
+
+```text
+experiment.tsx(71,23): error TS2741: Property 'title' is missing in type '{ children: string; }' but required in type '{ title: string; }'.
+```
+
+`PropsWithChildren` adds optional children, but does not make the existing `title: string` field optional. Supplying `title="Agenda"` fixes this call.
+
+#### E11: Native button props are checked
+
+```tsx
+const wrongHref = <ActionButton href="/agenda">Open</ActionButton>
+const wrongType = <ActionButton type="launch">Start</ActionButton>
+```
+
+**Actual diagnostics:**
+
+```text
+experiment.tsx(78,33): error TS2322: Type '{ children: string; href: string; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement>'.
+  Property 'href' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement>'. Did you mean 'ref'?
+experiment.tsx(79,33): error TS2322: Type '"launch"' is not assignable to type '"button" | "submit" | "reset" | undefined'.
+```
+
+A native button does not accept an anchor's `href`. Its `type` is limited to `button`, `submit` or `reset` when supplied. The valid P7 call uses `type="button"` and `disabled`. The compiler's suggestion `ref` is part of the recorded message; it is not a replacement for link navigation.
 
 ## JavaScript vs TypeScript
+
+The destructuring operations run the same way in JS and TS. TypeScript adds checks before execution; annotations do not convert runtime values. The table refers to real diagnostics from the isolated experiment recorded below.
+
+| Form | What stays the same | What TypeScript adds or checks | Actual diagnostic |
+|---|---|---|---|
+| 1: returned tuple | Values are taken by position | An explicit tuple records each position's type | [E1: TS2322](#e1-returned-tuple), string in the second position does not fit number |
+| 2: array pattern | Skipping and rest use the source iterator | The source must have an iterator | [E2: TS2488](#e2-iterable-source), numeric keys and length do not provide Symbol.iterator |
+| 3: swap | The right side is read before assignment | Both existing bindings must be writable | [E3: TS2588](#e3-writable-swap-targets), both const targets are rejected |
+| 4: array default | The fallback applies only to undefined | The fallback must fit the annotated element type | [E4: TS2322](#e4-array-default-type), a string fallback does not fit number |
+| 5: named fields | Properties are selected by name | The source type must contain the requested property | [E5: TS2339](#e5-existing-property), duration is absent from the source type |
+| 6: rename | A colon chooses a new local name | Only the new binding exists | [E6: TS2304](#e6-renamed-binding), sessionTitle is not a local variable |
+| 9: nesting | The pattern reads the nested structure | An optional intermediate object needs a check or default | [E7: TS2339](#e7-optional-nested-object), owner can be undefined |
+| 10: computed key | An expression selects the property | A known key union or suitable index signature is needed | [E8: TS2537](#e8-computed-key), an arbitrary string cannot index these fixed keys |
+
+### Isolated compiler experiment
+
+The following file was temporarily saved as `experiment.tsx` in the project root, outside the starter tsconfig's include patterns. It was only type-checked, never executed. The command explicitly supplies the relevant options because a file was passed directly to `tsc`:
+
+```powershell
+npx tsc --noEmit --strict --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext --jsx react-jsx --noUncheckedIndexedAccess experiment.tsx
+```
+
+The command exited with code 1 as expected, reporting the deliberate errors. The source is retained here for reference; the temporary file was removed afterward and `npm run check` passed. No suppression was added to these experiments. The only source suppression remains the permitted T5 `@ts-expect-error`.
+
+```tsx
+// İrem AYRANPINAR, 2300005623
+// Deliberately invalid experiments. Type-check only; do not execute this file.
+import type { ReactNode, PropsWithChildren, ComponentProps } from 'react'
+
+// E1: a tuple position has the wrong type.
+{
+  const result: [number, string] = [25, 'Drawing']
+  const [minutes, title]: [number, number] = result
+  console.log(minutes, title)
+}
+
+// E2: a plain object is not an iterable.
+{
+  const [first] = { 0: 'Drawing', length: 1 }
+  console.log(first)
+}
+
+// E3: swap requires writable variables.
+{
+  const first = 'Drawing'
+  const second = 'React'
+  ;[first, second] = [second, first]
+}
+
+// E4: the fallback must fit the annotated tuple position.
+{
+  const [minutes = 'twenty-five']: [number?] = []
+  console.log(minutes)
+}
+
+// E5: the source property does not exist.
+{
+  const session = { title: 'Drawing' }
+  const { duration } = session
+  console.log(duration)
+}
+
+// E6: rename creates the new binding, not the original name.
+{
+  const { sessionTitle: heading } = { sessionTitle: 'Drawing' }
+  console.log(sessionTitle, heading)
+}
+
+// E7: a nested optional object needs a check or a default.
+{
+  const session: { owner?: { name: string } } = {}
+  const { owner: { name } } = session
+  console.log(name)
+}
+
+// E8: an arbitrary string is not a known key.
+{
+  const totals = { monday: 50, tuesday: 75 }
+  const key: string = 'monday'
+  const { [key]: minutes } = totals
+  console.log(minutes)
+}
+
+// E9: ordinary ReactNode children cannot be functions or plain objects.
+function NodeCard({ children }: { children?: ReactNode }) {
+  return <section>{children}</section>
+}
+const invalidFunction = <NodeCard>{() => <b>Drawing</b>}</NodeCard>
+const invalidObject = <NodeCard>{{ label: 'Drawing' }}</NodeCard>
+console.log(invalidFunction, invalidObject)
+
+// E10: PropsWithChildren preserves the required title prop.
+function Layout({ title, children }: PropsWithChildren<{ title: string }>) {
+  return <aside><h2>{title}</h2>{children}</aside>
+}
+const missingTitle = <Layout>Drawing</Layout>
+console.log(missingTitle)
+
+// E11: native button props reject an anchor's href and an invalid type.
+function ActionButton({ children, ...rest }: ComponentProps<'button'>) {
+  return <button {...rest}>{children}</button>
+}
+const wrongHref = <ActionButton href="/agenda">Open</ActionButton>
+const wrongType = <ActionButton type="launch">Start</ActionButton>
+console.log(wrongHref, wrongType)
+```
+
+### Recorded diagnostics for the table
+
+The messages and line numbers below are copied from that temporary file's compiler run. E9–E11 are recorded under P7 above.
+
+#### E1: Returned tuple
+
+```text
+experiment.tsx(8,9): error TS2322: Type '[number, string]' is not assignable to type '[number, number]'.
+  Type at position 1 in source is not compatible with type at position 1 in target.
+    Type 'string' is not assignable to type 'number'.
+```
+
+#### E2: Iterable source
+
+```text
+experiment.tsx(14,9): error TS2488: Type '{ 0: string; length: 1; }' must have a '[Symbol.iterator]()' method that returns an iterator.
+```
+
+#### E3: Writable swap targets
+
+```text
+experiment.tsx(22,5): error TS2588: Cannot assign to 'first' because it is a constant.
+experiment.tsx(22,12): error TS2588: Cannot assign to 'second' because it is a constant.
+```
+
+#### E4: Array default type
+
+```text
+experiment.tsx(27,10): error TS2322: Type 'string' is not assignable to type 'number'.
+```
+
+#### E5: Existing property
+
+```text
+experiment.tsx(34,11): error TS2339: Property 'duration' does not exist on type '{ title: string; }'.
+```
+
+#### E6: Renamed binding
+
+```text
+experiment.tsx(41,15): error TS2304: Cannot find name 'sessionTitle'.
+```
+
+#### E7: Optional nested object
+
+```text
+experiment.tsx(47,20): error TS2339: Property 'name' does not exist on type '{ name: string; } | undefined'.
+```
+
+#### E8: Computed key
+
+```text
+experiment.tsx(55,12): error TS2537: Type '{ monday: number; tuesday: number; }' has no matching index signature for type 'string'.
+```
 
 ## Bonus 1: LaTeX
 
