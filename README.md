@@ -403,6 +403,112 @@ T5 fixed: 25 React revision
 
 ## Pitfalls
 
+The examples below are from `js/pitfalls.mjs`. The outputs were captured with `node js/pitfalls.mjs` on Node v24.21.0. The teacher's initial example is preserved and also prints `pitfall 1: TypeError`.
+
+### Pitfall 1: Destructuring null or undefined throws
+
+```js
+for (const value of [undefined, null]) {
+  try {
+    const { title } = value
+    console.log(title)
+  } catch (error) {
+    console.log('own pitfall 1:', error.name, error.message)
+  }
+}
+```
+
+**Actual output:**
+
+```text
+own pitfall 1: TypeError Cannot destructure property 'title' of 'value' as it is undefined.
+own pitfall 1: TypeError Cannot destructure property 'title' of 'value' as it is null.
+```
+
+**Why:** Neither `null` nor `undefined` can be used as the source of an object pattern. The operation fails before a `title` value can be read. Check that the source exists before destructuring it; a default for the `title` property alone would not fix the missing source.
+
+### Pitfall 2: Defaults preserve null
+
+```js
+{
+  const { minutes: missingMinutes = 25 } = {}
+  const { minutes: undefinedMinutes = 25 } = { minutes: undefined }
+  const { minutes: nullMinutes = 25 } = { minutes: null }
+  console.log('pitfall 2:', missingMinutes, undefinedMinutes, nullMinutes)
+}
+```
+
+**Actual output:**
+
+```text
+pitfall 2: 25 25 null
+```
+
+**Why:** A missing property is read as `undefined`, so both the missing and explicit `undefined` cases select `25`. The `null` value is preserved. A destructuring default does not replace every empty-looking or falsy value.
+
+### Pitfall 3: Assignment patterns need parentheses
+
+```js
+{
+  try {
+    new Function('let title; { title } = { title: "Study React" };')()
+  } catch (error) {
+    console.log('pitfall 3 error:', error.name, error.message)
+  }
+  let title
+  ;({ title } = { title: 'Study React' })
+  console.log('pitfall 3 fixed:', title)
+}
+```
+
+**Actual output:**
+
+```text
+pitfall 3 error: SyntaxError Unexpected token '='
+pitfall 3 fixed: Study React
+```
+
+**Why:** At the start of a statement, `{ title }` is parsed as a block, so the following `=` is invalid there. Parentheses make the destructuring assignment an expression. The leading semicolon keeps it separate from the previous statement. `new Function` parses the deliberately incorrect experiment text separately; writing that syntax directly in the file would prevent the entire file from running, even inside a try block.
+
+### Pitfall 4: Nested objects are shared
+
+```js
+{
+  const original = { owner: { name: 'Irem' }, title: 'Daily agenda' }
+  const { owner } = original
+  owner.name = 'Updated owner'
+  console.log('pitfall 4:', original.owner.name, owner === original.owner)
+}
+```
+
+**Actual output:**
+
+```text
+pitfall 4: Updated owner true
+```
+
+**Why:** The variable `owner` holds the same object reference as `original.owner`. Changing its `name` therefore changes what is read through the original object too. The `true` comparison confirms the shared reference. Destructuring does not make a deep copy.
+
+### Pitfall 5: Object names and array positions match differently
+
+```js
+{
+  const { title, minutes } = { minutes: 25, title: 'React revision' }
+  const [first, second] = [25, 'React revision']
+  console.log('pitfall 5 object:', title, minutes)
+  console.log('pitfall 5 array:', first, second)
+}
+```
+
+**Actual output:**
+
+```text
+pitfall 5 object: React revision 25
+pitfall 5 array: 25 React revision
+```
+
+**Why:** The object pattern selects properties by name, even though `minutes` is written first in the source object. The array pattern selects by position: `first` gets `25` and `second` gets `'React revision'`. Renaming the array variables would not change which positions they read.
+
 ## Props and children
 
 ## JavaScript vs TypeScript
