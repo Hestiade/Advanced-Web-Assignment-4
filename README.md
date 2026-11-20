@@ -511,6 +511,345 @@ pitfall 5 array: 25 React revision
 
 ## Props and children
 
+The examples below are from `js/props.jsx` and `ts/props.tsx`. Rendered HTML was captured from `npm run all` using the installed React 19.3.1. Both files use `renderToStaticMarkup` from `react-dom/server`. The TS file also imports `ReactNode`, `PropsWithChildren` and `ComponentProps` as types.
+
+### P1: One props object
+
+Both components receive one props object. `CardA` reads its fields with `props.title` and `props.children`; `CardB` extracts them in the parameter list. This combines object destructuring (Form 5) with a parameter pattern (Form 11). The teacher's components are preserved and called with new inputs. TS adds `CardProps` after the whole parameter pattern. See [React: Passing Props to a Component](https://react.dev/learn/passing-props-to-a-component).
+
+**JavaScript:**
+
+```jsx
+function CardA(props) {
+  return <section><h2>{props.title}</h2>{props.children}</section>
+}
+function CardB({ title, children }) {
+  return <section><h2>{title}</h2>{children}</section>
+}
+
+// P1: the existing CardA and CardB receive the same props object.
+console.log('P1 A:', renderToStaticMarkup(<CardA title="Agenda">Plan a drawing session</CardA>))
+console.log('P1 B:', renderToStaticMarkup(<CardB title="Agenda">Plan a drawing session</CardB>))
+```
+
+**TypeScript:**
+
+```tsx
+type CardProps = { title: string; children?: ReactNode }
+
+function Card({ title, children }: CardProps) {
+  return <section><h2>{title}</h2>{children}</section>
+}
+
+// P1: add a non-destructured counterpart; keep the existing Card function.
+function CardWithoutPattern(props: CardProps) {
+  return <section><h2>{props.title}</h2>{props.children}</section>
+}
+
+// P1: the existing CardWithoutPattern and Card receive the same props object.
+console.log('P1 A:', renderToStaticMarkup(<CardWithoutPattern title="Agenda">Plan a drawing session</CardWithoutPattern>))
+console.log('P1 B:', renderToStaticMarkup(<Card title="Agenda">Plan a drawing session</Card>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P1 A: <section><h2>Agenda</h2>Plan a drawing session</section>
+P1 B: <section><h2>Agenda</h2>Plan a drawing session</section>
+```
+
+### P2: children is a prop
+
+The text between the component tags becomes its `children` prop. Giving that same text through the `children` attribute produces the same HTML. Other props, such as `title`, remain separate fields of the same object.
+
+**JavaScript:**
+
+```jsx
+// P2: children between tags and children as an attribute.
+console.log('P2 tags:', renderToStaticMarkup(<CardB title="Agenda">Draw a cover</CardB>))
+console.log('P2 prop:', renderToStaticMarkup(<CardB title="Agenda" children="Draw a cover" />))
+```
+
+**TypeScript:**
+
+```tsx
+// P2: children between tags and children as an attribute.
+console.log('P2 tags:', renderToStaticMarkup(<Card title="Agenda">Draw a cover</Card>))
+console.log('P2 prop:', renderToStaticMarkup(<Card title="Agenda" children="Draw a cover" />))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P2 tags: <section><h2>Agenda</h2>Draw a cover</section>
+P2 prop: <section><h2>Agenda</h2>Draw a cover</section>
+```
+
+### P3: What appears as child content
+
+The following cases were rendered separately. Strings and numbers appear as text, including zero. Elements produce markup; the array of elements renders both in order. `undefined`, `null` and `false` produce no child content.
+
+| Value | Observed child content |
+|---|---|
+| String | Its text |
+| Number, including zero | Numeric text |
+| One element | Its markup |
+| Several elements | Each element's markup in order |
+| undefined, null, false | No child content |
+| Raw function | No child content, with a React warning in the JS experiment |
+| Function called by RenderCard | The markup returned by the function |
+
+**JavaScript:**
+
+```jsx
+// P3: values that React can render directly.
+const childCases = [
+  ['string', 'React revision'],
+  ['number', 25],
+  ['zero', 0],
+  ['element', <strong>Drawing</strong>],
+  ['several', [<span key="a">Study</span>, <span key="b">Draw</span>]],
+  ['undefined', undefined],
+  ['null', null],
+  ['false', false],
+]
+for (const [label, child] of childCases) {
+  console.log('P3 ' + label + ':', renderToStaticMarkup(<CardB title="Child">{child}</CardB>))
+}
+
+// A raw function is not rendered as ordinary child content. Capture React's real warning.
+{
+  const warnings = []
+  const originalError = console.error
+  console.error = (...values) => warnings.push(values.map(String).join(' '))
+  try {
+    const html = renderToStaticMarkup(<CardB title="Function">{() => <b>Not called</b>}</CardB>)
+    console.log('P3 raw function:', html)
+  } catch (error) {
+    console.log('P3 raw function error:', error.name, error.message)
+  } finally {
+    console.error = originalError
+  }
+  console.log('P3 raw function warnings:', warnings)
+}
+function RenderCard({ children }) {
+  return <section>{children('Drawing')}</section>
+}
+console.log('P3 render prop:', renderToStaticMarkup(<RenderCard>{(activity) => <b>{activity}</b>}</RenderCard>))
+```
+
+**TypeScript:**
+
+```tsx
+// P3: values that React can render directly.
+const childCases: [string, ReactNode][] = [
+  ['string', 'React revision'],
+  ['number', 25],
+  ['zero', 0],
+  ['element', <strong>Drawing</strong>],
+  ['several', [<span key="a">Study</span>, <span key="b">Draw</span>]],
+  ['undefined', undefined],
+  ['null', null],
+  ['false', false],
+]
+for (const [label, child] of childCases) {
+  console.log('P3 ' + label + ':', renderToStaticMarkup(<Card title="Child">{child}</Card>))
+}
+
+function RenderCard({ children }: { children: (activity: string) => ReactNode }) {
+  return <section>{children('Drawing')}</section>
+}
+console.log('P3 render prop:', renderToStaticMarkup(<RenderCard>{(activity) => <b>{activity}</b>}</RenderCard>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P3 string: <section><h2>Child</h2>React revision</section>
+P3 number: <section><h2>Child</h2>25</section>
+P3 zero: <section><h2>Child</h2>0</section>
+P3 element: <section><h2>Child</h2><strong>Drawing</strong></section>
+P3 several: <section><h2>Child</h2><span>Study</span><span>Draw</span></section>
+P3 undefined: <section><h2>Child</h2></section>
+P3 null: <section><h2>Child</h2></section>
+P3 false: <section><h2>Child</h2></section>
+P3 render prop: <section><b>Drawing</b></section>
+```
+
+**Additional JS-only output for the raw function:**
+
+```text
+P3 raw function: <section><h2>Function</h2></section>
+P3 raw function warnings: [
+  'Functions are not valid as a React child. This may happen if you return %s instead of <%s /> from render. Or maybe you meant to call this function rather than return it. children children'
+]
+```
+
+The warning above is captured from React's real `console.error` call. Its format placeholders remain in the captured string because the example joins the original arguments. The original `console.error` is restored in `finally`.
+
+A raw function is not ordinary ReactNode child content. `RenderCard` instead declares a function-valued children contract and explicitly calls it with `'Drawing'`. React renders the returned element. This is the [render-prop alternative described by React](https://react.dev/reference/react/Children#calling-a-render-prop-to-customize-rendering). The TS version includes the valid render-prop example; the invalid ordinary child is reserved for the isolated compiler experiment in stage 9.
+
+### P4: Rest props and spread order
+
+The parameter pattern removes `title` and `children` before collecting the remaining props in `rest`. Those two fields are handled inside the component; `id` and `className` are forwarded to the section. The last assignment of `className` wins: spread last uses `from-rest`, while explicit last uses `fixed`. The TS intersection combines section props with the required custom `title`.
+
+**JavaScript:**
+
+```jsx
+// P4: rest excludes title/children; the last className wins.
+function RestLastPanel({ title, children, ...rest }) {
+  return <section className="fixed" {...rest}><h2>{title}</h2>{children}</section>
+}
+function ExplicitLastPanel({ title, children, ...rest }) {
+  return <section {...rest} className="fixed"><h2>{title}</h2>{children}</section>
+}
+const panelProps = { id: 'agenda', className: 'from-rest' }
+console.log('P4 rest last:', renderToStaticMarkup(<RestLastPanel title="Agenda" {...panelProps}>Notes</RestLastPanel>))
+console.log('P4 explicit last:', renderToStaticMarkup(<ExplicitLastPanel title="Agenda" {...panelProps}>Notes</ExplicitLastPanel>))
+```
+
+**TypeScript:**
+
+```tsx
+// P4: rest excludes title/children; the last className wins.
+type PanelProps = ComponentProps<'section'> & { title: string }
+function RestLastPanel({ title, children, ...rest }: PanelProps) {
+  return <section className="fixed" {...rest}><h2>{title}</h2>{children}</section>
+}
+function ExplicitLastPanel({ title, children, ...rest }: PanelProps) {
+  return <section {...rest} className="fixed"><h2>{title}</h2>{children}</section>
+}
+const panelProps = { id: 'agenda', className: 'from-rest' }
+console.log('P4 rest last:', renderToStaticMarkup(<RestLastPanel title="Agenda" {...panelProps}>Notes</RestLastPanel>))
+console.log('P4 explicit last:', renderToStaticMarkup(<ExplicitLastPanel title="Agenda" {...panelProps}>Notes</ExplicitLastPanel>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P4 rest last: <section class="from-rest" id="agenda"><h2>Agenda</h2>Notes</section>
+P4 explicit last: <section id="agenda" class="fixed"><h2>Agenda</h2>Notes</section>
+```
+
+### P5: Named slots or composed children
+
+`SlotCard` gives named `header` and `footer` props fixed regions in the layout. Its paragraph is `children`. `CompositionCard` receives the entire layout as `children`, letting the caller choose the structure and order. The two calls happen to produce identical HTML, but the named-slot version controls the layout more closely.
+
+**JavaScript:**
+
+```jsx
+// P5: named slots versus composed children.
+function SlotCard({ header, footer, children }) {
+  return <article><header>{header}</header><main>{children}</main><footer>{footer}</footer></article>
+}
+function CompositionCard({ children }) {
+  return <article>{children}</article>
+}
+console.log('P5 slots:', renderToStaticMarkup(<SlotCard header={<h2>Today</h2>} footer={<small>One session</small>}><p>Draw</p></SlotCard>))
+console.log('P5 children:', renderToStaticMarkup(<CompositionCard><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></CompositionCard>))
+```
+
+**TypeScript:**
+
+```tsx
+// P5: named slots versus composed children.
+function SlotCard({ header, footer, children }: { header: ReactNode; footer: ReactNode; children?: ReactNode }) {
+  return <article><header>{header}</header><main>{children}</main><footer>{footer}</footer></article>
+}
+function CompositionCard({ children }: PropsWithChildren) {
+  return <article>{children}</article>
+}
+console.log('P5 slots:', renderToStaticMarkup(<SlotCard header={<h2>Today</h2>} footer={<small>One session</small>}><p>Draw</p></SlotCard>))
+console.log('P5 children:', renderToStaticMarkup(<CompositionCard><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></CompositionCard>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P5 slots: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+P5 children: <article><header><h2>Today</h2></header><main><p>Draw</p></main><footer><small>One session</small></footer></article>
+```
+
+### P6: Defaults
+
+Both a missing title and an explicit `undefined` use `Untitled session`. With `null`, the heading element stays empty; the default is not selected. The TS type explicitly permits `null` so the same experiment can run. This matches [React's explanation of prop defaults](https://react.dev/learn/passing-props-to-a-component#specifying-a-default-value-for-a-prop).
+
+**JavaScript:**
+
+```jsx
+// P6: missing/undefined use the default; null does not.
+function DefaultCard({ title = 'Untitled session', children }) {
+  return <section><h2>{title}</h2>{children}</section>
+}
+console.log('P6 missing:', renderToStaticMarkup(<DefaultCard>Notes</DefaultCard>))
+console.log('P6 undefined:', renderToStaticMarkup(<DefaultCard title={undefined}>Notes</DefaultCard>))
+console.log('P6 null:', renderToStaticMarkup(<DefaultCard title={null}>Notes</DefaultCard>))
+```
+
+**TypeScript:**
+
+```tsx
+// P6: missing/undefined use the default; null does not.
+function DefaultCard({ title = 'Untitled session', children }: { title?: string | null; children?: ReactNode }) {
+  return <section><h2>{title}</h2>{children}</section>
+}
+console.log('P6 missing:', renderToStaticMarkup(<DefaultCard>Notes</DefaultCard>))
+console.log('P6 undefined:', renderToStaticMarkup(<DefaultCard title={undefined}>Notes</DefaultCard>))
+console.log('P6 null:', renderToStaticMarkup(<DefaultCard title={null}>Notes</DefaultCard>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P6 missing: <section><h2>Untitled session</h2>Notes</section>
+P6 undefined: <section><h2>Untitled session</h2>Notes</section>
+P6 null: <section><h2></h2>Notes</section>
+```
+
+### P7: Types of children and native props
+
+`children?: ReactNode` allows renderable values and makes children optional. `PropsWithChildren<{ title: string }>` adds optional ReactNode children while keeping `title` required. `ComponentProps<'button'>` reuses the native button prop types, including `type` and `disabled`. These types are imported only by the TS file; the JS wrappers show the same runtime behavior.
+
+**JavaScript:**
+
+```jsx
+// P7: runtime counterparts of the TypeScript wrappers.
+function Layout({ title, children }) {
+  return <aside><h2>{title}</h2>{children}</aside>
+}
+function ActionButton({ children, ...rest }) {
+  return <button {...rest}>{children}</button>
+}
+console.log('P7 node:', renderToStaticMarkup(<CardB title="ReactNode">{25}</CardB>))
+console.log('P7 optional:', renderToStaticMarkup(<Layout title="No child" />))
+console.log('P7 button:', renderToStaticMarkup(<ActionButton type="button" disabled>Start</ActionButton>))
+```
+
+**TypeScript:**
+
+```tsx
+// P7: PropsWithChildren and native button props.
+function Layout({ title, children }: PropsWithChildren<{ title: string }>) {
+  return <aside><h2>{title}</h2>{children}</aside>
+}
+function ActionButton({ children, ...rest }: ComponentProps<'button'>) {
+  return <button {...rest}>{children}</button>
+}
+console.log('P7 node:', renderToStaticMarkup(<Card title="ReactNode">{25}</Card>))
+console.log('P7 optional:', renderToStaticMarkup(<Layout title="No child" />))
+console.log('P7 button:', renderToStaticMarkup(<ActionButton type="button" disabled>Start</ActionButton>))
+```
+
+**Actual output (same in JS and TS):**
+
+```text
+P7 node: <section><h2>ReactNode</h2>25</section>
+P7 optional: <aside><h2>No child</h2></aside>
+P7 button: <button type="button" disabled="">Start</button>
+```
+
+The button's static HTML contains `disabled=""`; this terminal example does not simulate a click. The isolated E9–E11 compiler experiment for function children, `type="launch"` and button `href` follows in stage 9.
+
 ## JavaScript vs TypeScript
 
 ## Bonus 1: LaTeX
